@@ -24,5 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<mini_shoulda>, [">= 0"])
   s.add_development_dependency(%q<mocha>, [">= 0"])
   s.add_development_dependency(%q<rails>, ["~> 3"])
+  s.add_dependency('fnv', '0.2.0')
 end
 

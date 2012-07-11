@@ -1,5 +1,5 @@
 require 'digest/sha1'
-require 'zlib'
+require 'fnv'
 
 module Dalli
   class Ring
@@ -63,7 +63,7 @@ module Dalli
     end
 
     def hash_for(key)
-      Zlib.crc32(key)
+      FNV.new.fnv1_32(key)
     end
 
     def entry_count_for(server, total_servers, total_weight)
