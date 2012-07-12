@@ -1,4 +1,4 @@
-require 'digest/sha1'
+require 'digest/md5'
 require 'fnv'
 
 module Dalli
@@ -15,9 +15,15 @@ module Dalli
         continuum = []
         servers.each do |server|
           entry_count_for(server, servers.size, total_weight).times do |idx|
-            hash = Digest::SHA1.hexdigest("#{server.hostname}:#{server.port}:#{idx}")
-            value = Integer("0x#{hash[0..7]}")
-            continuum << Dalli::Ring::Entry.new(value, server)
+            if server.port == 11211
+              results = Digest::MD5.digest("#{server.hostname}-#{idx}")
+            else
+              results = Digest::MD5.digest("#{server.hostname}:#{server.port}-#{idx}")
+            end
+            0.upto(3) do |alignment|
+              value = ((results[3 + alignment * 4] & 0xFF) << 24) | ((results[2 + alignment * 4] & 0xFF) << 16) | ((results[1 + alignment * 4] & 0xFF) << 8) | (results[0 + alignment * 4] & 0xFF)
+              continuum << Dalli::Ring::Entry.new(value, server)
+            end
           end
         end
         @continuum = continuum.sort { |a, b| a.value <=> b.value }
